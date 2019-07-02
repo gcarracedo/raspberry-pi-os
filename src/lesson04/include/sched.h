@@ -13,6 +13,9 @@
 #define LAST_TASK task[NR_TASKS-1]
 
 #define TASK_RUNNING				0
+#define TASK_STOPED					1
+#define TASK_READY					2
+
 
 extern struct task_struct *current;
 extern struct task_struct * task[NR_TASKS];
