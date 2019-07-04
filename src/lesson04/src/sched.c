@@ -21,18 +21,57 @@ void preempt_enable(void)
 void _schedule(void)
 {
 	preempt_disable();
+	int actual, limiteprioridad;
 	int next,c;
+
+
 	struct task_struct * p;
+ //asignacion de prioridades RR
+	for (int j =0; j < NR_TASKS; j++){
+  task_struct[j].prioridadRR = j;
+		limiteprioridad = j;
+	}
+	//asignacion de prioridades RR
 	while (1) {
 		c = -1;
 		next = 0;
-		for (int i = 0; i < NR_TASKS; i++){
+		for (int i = 0; i < NR_TASKS; i++){ //ciclo original
 			p = task[i];
+			actual = i;
+			//ecitar bugs supongo
+			if (actual > limiteprioridad){
+				actual = 0;
+				i = 0; //reset ciclo original
+			}
+			//evitar bugs supongo
+			if(task_struct[i].prioridadRR == actual){
+				//if para RR
 			if (p && p->state == TASK_RUNNING && p->counter > c) {
 				c = p->counter;
+				//reingresar a la lista de prioridadesRR y cambiar a otro cuando termine el counter
+				task_struct[i].prioridadRR = limiteprioridad + 1;
+				limiteprioridad++;
+				//reset de prioridades en caso de numero muy algo
+				if (limiteprioridad > 3000){ //numero arbitrario para resetear prioridades
+					for (int k =0; k < NR_TASKS; k++){
+				  task_struct[j].prioridadRR = k;
+						limiteprioridad = k;
+						i = 0; //reset ciclo original
+					}
+					//reset de prioridades en caso de numero muy algo
+				}
+				switch_to(task[next]);
+				//reingresar a la lista de prioridadesRR y cambiar a otro cuando termine el counter
 				next = i;
+
 			}
+		}//} para RR
+		else //para RR
+		 switch_to(task[next]); //si no culple la prioridad, cambiar de estado
+
+
 		}
+
 		if (c) {
 			break;
 		}
@@ -43,8 +82,10 @@ void _schedule(void)
 			}
 		}
 	}
-	switch_to(task[next]);
+
 	preempt_enable();
+
+
 }
 
 void schedule(void)
@@ -53,9 +94,9 @@ void schedule(void)
 	_schedule();
 }
 
-void switch_to(struct task_struct * next) 
+void switch_to(struct task_struct * next)
 {
-	if (current == next) 
+	if (current == next)
 		return;
 	struct task_struct * prev = current;
 	current = next;

@@ -1,13 +1,13 @@
 #ifndef _SCHED_H
 #define _SCHED_H
 
-#define THREAD_CPU_CONTEXT			0 		// offset of cpu_context in task_struct 
+#define THREAD_CPU_CONTEXT			0 		// offset of cpu_context in task_struct
 
 #ifndef __ASSEMBLER__
 
 #define THREAD_SIZE				4096
 
-#define NR_TASKS				64 
+#define NR_TASKS				64
 
 #define FIRST_TASK task[0]
 #define LAST_TASK task[NR_TASKS-1]
@@ -39,10 +39,11 @@ struct cpu_context {
 
 struct task_struct {
 	struct cpu_context cpu_context;
-	long state;	
+	long state;
 	long counter;
 	long priority;
 	long preempt_count;
+	int prioridadRR; //ID para usar RR
 };
 
 extern void sched_init(void);
